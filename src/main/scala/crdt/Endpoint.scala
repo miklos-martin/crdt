@@ -16,8 +16,12 @@ object Endpoint extends App {
   implicit val executionContext = system.dispatcher
   implicit val timeout = Timeout(1 second)
 
-  val api = system.actorOf(Props[APIActor], "api")
+  val config = ConfigFactory.load()
+  val ip = config.getString("crdt.ip")
+  val port = config.getInt("crdt.port")
+  implicit val nodeName = s"$ip:$port";
 
+  val api = system.actorOf(API.props)
   val handler = Sink.foreach[Tcp.IncomingConnection] { connection =>
     import connection._
     println(s"New connection from: $remoteAddress")
@@ -37,9 +41,6 @@ object Endpoint extends App {
     connection.handleWith(serverLogic)
   }
 
-  val config = ConfigFactory.load()
-  val ip = config.getString("crdt.ip")
-  val port = config.getInt("crdt.port")
   val connections = Tcp().bind(ip, port)
   val binding = connections.to(handler).run()
 
