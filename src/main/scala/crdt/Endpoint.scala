@@ -2,16 +2,21 @@ package crdt
 
 import akka.stream._
 import akka.stream.scaladsl._
-import akka.actor.ActorSystem
-import akka.util.ByteString
+import akka.actor.{ ActorSystem, Props }
+import akka.pattern.ask
+import akka.util.{ ByteString, Timeout }
 import com.typesafe.config.ConfigFactory
 import com.typesafe.conductr.lib.scala.ConnectionContext.Implicits.global
 import com.typesafe.conductr.bundlelib.scala.StatusService
+import scala.concurrent.duration._
 
 object Endpoint extends App {
   implicit val system = ActorSystem("crdt")
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
+  implicit val timeout = Timeout(1 second)
+
+  val api = system.actorOf(Props[APIActor], "api")
 
   val handler = Sink.foreach[Tcp.IncomingConnection] { connection =>
     import connection._
@@ -19,7 +24,7 @@ object Endpoint extends App {
 
     val commandHandler = Flow[String]
       .takeWhile(_ != API.quit)
-      .map(API.parse _ andThen API.handle _)
+      .mapAsync(2)(str => api ? API.parse(str))
 
     val serverLogic = Flow[ByteString]
       .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 128))

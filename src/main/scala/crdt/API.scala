@@ -1,5 +1,22 @@
 package crdt
 
+import akka.actor._
+import akka.pattern.ask
+import akka.util.Timeout
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.duration._
+
+case class Command(name: String, args: List[String])
+
+class APIActor extends Actor {
+  implicit val timeout = Timeout(1 second)
+
+  def receive = {
+    case Command(API.help, _) => sender ! API.helpText
+    case Command(cmd, args) => sender ! s"Cmd `$cmd` with args: $args failed"
+  }
+}
+
 object API {
   val help = ":h"
   val quit = ":q"
@@ -11,14 +28,9 @@ object API {
     s"""|Welcome to the CRDT sandbox API on $host
         |Try out $help for help""".stripMargin
 
-  def parse(input: String): (String, List[String]) = {
+  def parse(input: String): Command = {
     val parts = input.split(" ").toList
-    (parts.head, parts.tail)
-  }
-
-  def handle(parsedInput: (String, List[String])): String = parsedInput match {
-    case (this.help, _) => helpText
-    // other commands
-    case (cmd, args) => s"Cmd `$cmd` with args: $args failed"
+    Command(parts.head, parts.tail)
   }
 }
+
