@@ -20,8 +20,8 @@ class Counters(implicit nodeName: String) extends Actor {
   var counters = Map.empty[String, ActorRef]
 
   def receive = {
-    case inc@IncrementGCounter(key, value) => counterFor(key) forward inc
-    case get@GetValueGCounter(key) => counterFor(key) forward get
+    case inc @ IncrementGCounter(key, value) => counterFor(key) forward inc
+    case get @ GetValueGCounter(key) => counterFor(key) forward get
   }
 
   def counterFor(key: String): ActorRef =
