@@ -1,13 +1,14 @@
 name := "crdt"
 version := "0.0.1"
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.1"
 
 enablePlugins(JavaAppPackaging)
 
-libraryDependencies += "com.typesafe.conductr" %% "scala-conductr-bundle-lib" % "1.4.12"
-libraryDependencies += "com.typesafe.akka" % "akka-stream_2.11" % "2.4.12"
+libraryDependencies += "com.typesafe.conductr" % "scala-conductr-bundle-lib_2.12" % "1.5.0"
+libraryDependencies += "com.typesafe.akka" % "akka-stream_2.12" % "2.4.14"
+libraryDependencies += "com.typesafe.akka" % "akka-cluster_2.12" % "2.4.14"
 
-libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.0" % "test"
+libraryDependencies += "org.scalatest" % "scalatest_2.12" % "3.0.1" % "test"
 
 import ByteConversions._
 
